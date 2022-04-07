@@ -1,23 +1,25 @@
 #include<iostream>
 #include<vector>
 using std::vector;
-
  class Card {
-     enum Rank {ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK = 10, QUEEN = 10, KING = 10};
+     enum Rank {ACE = 1, TWO, THREE, FOUR,FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING} ;
      enum Type {CLUBS, DIAMOND, HEARTS, SPADE};
-     public:
-        int getValue(Rank rank, Type type) {
-            int val = 0;
-            if (rank == ACE) {
-                val = 1;
-            } else if (rank == TWO) {
-                val = 2;
-            } else if (rank == THREE) {
-                val = 3;
-            }
-            return val;
-        };
 
+     Rank value;
+     Type suit;
+     public:
+        int getValue() {
+            if (value > TEN) {
+                return 10;
+            }
+            return value;
+        }
+
+        void displayCard() {
+            
+        }
+            
+        }
 
  };
 
@@ -53,5 +55,7 @@ using std::vector;
  };
 
 int main() {
+    
+
 
 }
