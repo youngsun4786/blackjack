@@ -1,5 +1,7 @@
 #include<iostream>
 #include<vector>
+#include<algorithm>
+#include<random>
 #include<string>
 using namespace std;
 using std::vector;
@@ -48,10 +50,10 @@ void Card::displayCard(){
         cout << value;
     }
     switch(suit) {
-        case CLUBS: cout << "C\n"; break;
-        case DIAMONDS: cout << "D\n"; break;
-        case HEARTS: cout << "H\n"; break;
-        case SPADES: cout << "S\n"; break;
+        case CLUBS: cout << "C"; break;
+        case DIAMONDS: cout << "D"; break;
+        case HEARTS: cout << "H"; break;
+        case SPADES: cout << "S"; break;
         default: break;
      }
 }
@@ -82,8 +84,10 @@ void Hand::clear(){
 void Hand::printDeck() {
     for (int i = 0; i < cards.size(); i++) {
         cards[i].displayCard();
+        cout << " ";
     }
 }
+// calculates the total points earned and returns the sum
 int Hand::getTotal() const{
     int sum = 0;
     int ace_count = 0;
@@ -134,29 +138,31 @@ void Deck::populate() {
          }
      }
  }
- //randomly shuffles the deck
- void Deck::shuffle() {
-    std::random_shuffle(cards.begin(), cards.end());
- }
+//randomly shuffles the deck
+void Deck::shuffle() {
+    std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::shuffle(cards.begin(), cards.end(), rng);
+}
 //deal a card from the deck
- void Deck::deal(Hand& h) {
+void Deck::deal(Hand& h) {
     //deal from the top
     // add the last card on deck to player's set
     h.add(cards.back());
     cards.pop_back(); //remove the last card from Cards deck
- }
+}
 
 
 // represents a generic abstract player that can be a human or computer.
 // Abstract class -> contains pure virtual method 
- class AbstractPlayer {
-     public:
-        Hand player;
-        AbstractPlayer(){};
-        virtual ~AbstractPlayer(){};
-        virtual bool isDrawing() const = 0;
-        bool isBusted(Hand& h); 
- };
+class AbstractPlayer {
+public:
+    Hand h;
+    AbstractPlayer(){};
+    virtual ~AbstractPlayer(){};
+    virtual bool isDrawing() const = 0;
+    bool isBusted(Hand& h); 
+};
 //returns true if player's set sum exceeds 21
 bool AbstractPlayer::isBusted(Hand& h) {
     return h.getTotal() > 21;
@@ -164,13 +170,13 @@ bool AbstractPlayer::isBusted(Hand& h) {
 
 
  class HumanPlayer: public AbstractPlayer{
-     public:
-        // ask this tomorrow during tutorial
-        HumanPlayer(){};
-        virtual ~HumanPlayer(){};
-        bool isDrawing() const;
-        void announce(int res);
- };
+public:
+    // ask this tomorrow during tutorial
+    // HumanPlayer(){};
+    // virtual ~HumanPlayer(){};
+    bool isDrawing() const;
+    void announce(int res);
+};
 // Asks users to draw a card if 'y' => draws another card
 bool HumanPlayer::isDrawing() const {
     bool drawAgain = false;
@@ -191,42 +197,48 @@ void HumanPlayer::announce(int res){
 }
 
 class ComputerPlayer: public AbstractPlayer{
-     ComputerPlayer(){};
-     virtual ~ComputerPlayer(){};
-     bool isDrawing() const;
+    // ComputerPlayer(){};
+    // virtual ~ComputerPlayer(){};
+    bool isDrawing() const;
  };
 bool ComputerPlayer::isDrawing() const{
     bool drawAgain = false;
-   if (player.getTotal() <= 16) {
+   if (h.getTotal() <= 16) {
        drawAgain = true;
       }
       return drawAgain; 
 }
  class BlackJackGame{
-     public:   
-        Deck m_deck;
-        ComputerPlayer m_casino;
-        void play(){
-            cout << "What's good" << endl;
-        }
- };
+     public:
+        BlackJackGame(){}; 
+        ~BlackJackGame(){};
+        Deck m_deck; // deck member
+        ComputerPlayer m_casino; // casino member
+        HumanPlayer m_player;   // player member
+        void play();
+};
+void BlackJackGame::play(){
+    // at the beginning populate the deck
+    // after, shuffle
+    // distribute cards to the house and player
+    m_deck.populate();
+    m_deck.shuffle();
+    // deal two cards to the player
+    for (int i = 0; i < 2; i++) {
+        m_deck.deal(m_player.h);
+    }
+    //deal a card to the casino
+    m_deck.deal(m_casino.h);
+
+
+}
 
 int main() {
+
     Deck d;
     d.populate();
-    cout << d.getTotal() << endl;
     d.shuffle();
-    HumanPlayer p1;
-    d.deal(p1.player);
-    p1.player.printDeck();
-    cout << d.cards.size() << endl;
-    d.deal(p1.player);
-    p1.player.printDeck();
-    cout << d.cards.size() << endl;
-
-
-
-
+    d.printDeck();
 //     cout << "\tWelcome to the Comp322 Blackjack game!" << endl << endl;
 //      BlackJackGame game;
 //      // The main loop of the game
