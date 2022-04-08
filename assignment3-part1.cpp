@@ -140,7 +140,9 @@ void Deck::populate() {
  }
 //randomly shuffles the deck
 void Deck::shuffle() {
+    // generate random seed
     std::random_device rd;
+    // this generates a random number
     std::default_random_engine rng(rd());
     std::shuffle(cards.begin(), cards.end(), rng);
 }
@@ -157,7 +159,8 @@ void Deck::deal(Hand& h) {
 // Abstract class -> contains pure virtual method 
 class AbstractPlayer {
 public:
-    Hand h;
+    Hand h; // hand instance
+    int num_wins; // keeps track of number 
     AbstractPlayer(){};
     virtual ~AbstractPlayer(){};
     virtual bool isDrawing() const = 0;
@@ -172,8 +175,8 @@ bool AbstractPlayer::isBusted(Hand& h) {
  class HumanPlayer: public AbstractPlayer{
 public:
     // ask this tomorrow during tutorial
-    // HumanPlayer(){};
-    // virtual ~HumanPlayer(){};
+    HumanPlayer(){};
+    virtual ~HumanPlayer(){};
     bool isDrawing() const;
     void announce(int res);
 };
@@ -188,17 +191,19 @@ bool HumanPlayer::isDrawing() const {
 }
 void HumanPlayer::announce(int res){
     if (res == 0) {
-        cout << "Casino wins.";
+        cout << "Casino wins." << endl;
     } else if (res == 1) {
-        cout << "Player wins.";
+        cout << "Player wins." << endl;
     } else {
-        cout << "Push: No one wins.";
+        cout << "Push: No one wins." << endl;
     }
 }
 
+
 class ComputerPlayer: public AbstractPlayer{
-    // ComputerPlayer(){};
-    // virtual ~ComputerPlayer(){};
+public:
+    ComputerPlayer(){};
+    virtual ~ComputerPlayer(){};
     bool isDrawing() const;
  };
 bool ComputerPlayer::isDrawing() const{
@@ -206,18 +211,22 @@ bool ComputerPlayer::isDrawing() const{
    if (h.getTotal() <= 16) {
        drawAgain = true;
       }
-      return drawAgain; 
+    return drawAgain; 
 }
+
+
  class BlackJackGame{
      public:
-        BlackJackGame(){}; 
-        ~BlackJackGame(){};
+        int rounds; // keep track of number of rounds
         Deck m_deck; // deck member
         ComputerPlayer m_casino; // casino member
         HumanPlayer m_player;   // player member
+        BlackJackGame(){}; 
+        ~BlackJackGame(){};
         void play();
 };
 void BlackJackGame::play(){
+    int winner = -1;
     // at the beginning populate the deck
     // after, shuffle
     // distribute cards to the house and player
@@ -229,31 +238,96 @@ void BlackJackGame::play(){
     }
     //deal a card to the casino
     m_deck.deal(m_casino.h);
-
-
+    bool player_bust = m_player.isBusted(m_player.h);
+    bool casino_bust = m_casino.isBusted(m_casino.h);
+    int casino_score = m_casino.h.getTotal();
+    int player_score = m_player.h.getTotal();
+    // the first start you must assume that no bust will happen
+    // print the house's information
+    cout << "Casino: ";
+    m_casino.h.printDeck();
+    std:: cout << "[" << casino_score << "]" << endl;
+    // print the player's information
+    cout << "Player: ";
+    m_player.h.printDeck();
+    std:: cout << "[" << player_score << "]" << endl;
+    
+    // while neither player or casino is busted
+    while (!player_bust || !casino_bust) { 
+        // ask for another draw
+        if(m_player.isDrawing()) {
+            // deal a card each
+            m_deck.deal(m_player.h);
+            m_deck.deal(m_casino.h);
+            // print the house's information
+            cout << "Casino: ";
+            m_casino.h.printDeck();
+            std:: cout << "[" << casino_score << "]" << endl;
+            // print the player's information
+            cout << "Player: ";
+            m_player.h.printDeck();
+            std:: cout << "[" << player_score << "]" << endl;
+        // if not reached 16 for casino
+        }else if(m_casino.isDrawing()) {
+            m_deck.deal(m_casino.h);
+            // print the house's information
+            cout << "Casino: ";
+            m_casino.h.printDeck();
+            std:: cout << "[" << casino_score << "]" << endl;
+        }else {
+            break; // break out of the loop
+        }
+    } 
+    // determining win condition (prioritize busts)
+    // 1. compare the results (get higher than the opponent or reach 21)
+    // 2. the opponent busts
+    // player wins
+    if (casino_bust) {
+        winner = 1; // 1 --> player wins
+        m_player.num_wins++; // increment win
+        m_player.announce(winner);
+    // casino wins
+    } else if (player_bust) {
+        winner = 0;
+        m_casino.num_wins++; // increment win
+        m_player.announce(winner);
+    // no busts -> player decides to stop drawing so compare scores
+    } else {
+        if (player_score > casino_score) {
+            winner = 1; // 1 --> player wins
+            m_player.num_wins++; // increment win
+            m_player.announce(winner);
+        // casino wins
+        } else if (casino_score > player_score) {
+            winner = 0;
+            m_casino.num_wins++; // increment win
+            m_player.announce(winner);
+        // tie (push)
+        } else {
+            m_player.announce(winner);
+        }
+    }
+    BlackJackGame::rounds++; // increment number of rounds
 }
 
 int main() {
 
-    Deck d;
-    d.populate();
-    d.shuffle();
-    d.printDeck();
-//     cout << "\tWelcome to the Comp322 Blackjack game!" << endl << endl;
-//      BlackJackGame game;
-//      // The main loop of the game
-//      bool playAgain = true;
-//      char answer = 'y';
-//      while (playAgain)
-//      {
-//          game.play();
-//          // Check whether the player would like to play another round
-//          cout << "Would you like another round? (y/n): ";
-//          cin >> answer;
-//          cout << endl << endl;
-//          playAgain = (answer == 'y' ? true : false);
-// }
-//      cout <<"Gave over!";     
+    cout << "\tWelcome to the Comp322 Blackjack game!" << endl << endl;
+     BlackJackGame game;
+     // The main loop of the game
+     bool playAgain = true;
+     char answer = 'y';
+     while (playAgain)
+     {
+         game.play();
+         // Check whether the player would like to play another round
+         cout << "Would you like another round? (y/n): ";
+         cin >> answer;
+         cout << endl << endl;
+         playAgain = (answer == 'y' ? true : false);
+}
+     cout <<"Gave over!"; 
+        
     return 0;
 }
  
