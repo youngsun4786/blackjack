@@ -6,3 +6,5 @@ IMPLEMENTING A GAME OF BLACKJACK
 Implemented 50% of "AbstractPlayer" class as well as enums for Rank and Type in "Card" class
 04/08/2022
 Finished part 1
+04/10/2022
+Finished part 2
