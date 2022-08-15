@@ -1,7 +1,6 @@
-# blackjack-assign322-cpp
+# blackjack game
 
-COMP322 FINAL ASSIGNMENT
-IMPLEMENTING A GAME OF BLACKJACK
+IMPLEMENTATION OF GAME BLACKJACK
 04/07/2022 
 Implemented 50% of "AbstractPlayer" class as well as enums for Rank and Type in "Card" class
 04/08/2022
